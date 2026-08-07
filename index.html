@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Cube Timer</title>
+        <link href="https://cdn.jsdelivr.net/npm/dseg@0.46.0/css/dseg.css" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+        <style>
+             @font-face {
+                font-family: 'KH Interference';
+                src: url('fonts/WOFF2/KHInterferenceTRIAL-Regular.woff2') format('woff2');
+                font-weight: normal;
+                font-style: normal;
+            }
+             @font-face {
+                font-family: 'KH Interference';
+                src: url('fonts/WOFF2/KHInterferenceTRIAL-Light.woff2') format('woff2');
+                font-weight: 300;
+                font-style: normal;
+            }
+             @font-face {
+                font-family: 'KH Interference';
+                src: url('fonts/WOFF2/KHInterferenceTRIAL-Bold.woff2') format('woff2');
+                font-weight: 700;
+                font-style: normal;
+            }
+            body {
+                display: flex;
+                background-color: black;
+                margin: 0;
+                padding: 0;
+                font-family: 'Bebas Neue', sans-serif;
+                box-sizing: border-box;
+                border: 2px solid #c2fe0b;
+            }
+            #grid-panel {
+                width: 30%;
+                height: 100vh;
+                color: white;
+                border-collapse: collapse; /* Important: allows border-radius to work */
+                border-spacing: 0;         /* Removes gaps between cells */
+                border-right: 2px solid #c2fe0b;
+                border-bottom: 2px solid #c2fe0b;
+                border-radius: 0px;
+                overflow-y: auto;
+            }
+            #timer-panel {
+                width: 70%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                height: 100vh;
+                gap: 40px;
+            }
+            #split-indicator{
+                font-family: 'Bebas Neue', Monospace;
+                height: 90px;
+                letter-spacing: 12px;
+                font-size: 80px;
+                color: #c2fe0b;
+            }
+            #timer-display {
+                font-size: 120px;
+                font-family: 'KH Interference', monospace;
+                color: white;
+            }
+            #ready-display {
+                font-size: 40px;
+                height: 50px;
+            }
+            #progress-bar {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                gap: 15px;
+            }
+            .diamond {
+                height: 10px;
+                width: 10px;
+                rotate: 45deg;
+                border: 2px solid #3a3a3a;
+            }
+            .progress-line {
+                height: 2px;
+                width: 50px;
+                background-color: #3a3a3a;
+            }
+            #best-display {
+                width: 30%;
+                height: 100vh;
+                position: absolute;
+                right: 0%;
+                border-spacing: 0;         /* Removes gaps between cells */
+                border: 2px solid #c2fe0b;
+                color: white;
+            }
+            table {
+                width: 100%;
+                table-layout: fixed; /* Ensures equal column widths */
+                border-spacing: 0;
+                text-align: center;
+                letter-spacing: 2px;
+                overflow: hidden;          /* Ensures content respects the radius */
+            }
+            #solves-table th{
+                padding: 15px;
+                text-align: center;
+                background-color:black;
+                border-bottom: 1px solid #c2fe0b;
+                font-family: 'Bebas Neue', Monospace;
+                font-size: 20px;
+                letter-spacing: 4px;
+                color: #c2fe0b;
+            }
+            #solves-table td{
+                padding: 15px 4px;
+                border-collapse: collapse;
+                font-family: 'JetBrains Mono', Monospace;
+                font-size: 15px;
+            }
+            #best-table th{
+                padding: 15px;
+                text-align: center;
+                background-color:#c2fe0b;
+                color: black;
+                font-family: 'KH Interference', Monospace;
+                font-weight: 400;
+                font-size: 20px;
+                letter-spacing: 4px;
+            }
+            #best-table td{
+                padding: 15px 4px;
+                border-collapse: collapse;
+                font-family: 'JetBrains Mono', Monospace;
+                font-size: 20px;
+            }
+            #best-table td:first-child {
+            text-align: left;
+            font-family: 'Bebas Neue', Monospace;
+            font-size: 25px;
+            column-width: 80px;
+            padding-left: 15px;
+            color: #c2fe0b;
+            }
+            tr {
+                background-color: #000000;
+                text-align: center;
+                padding: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="grid-panel">
+            <table id="solves-table">
+                <tr>
+                    <th>Total</th>
+                    <th>Cross</th>
+                    <th>F2L</th>
+                    <th>OLL</th>
+                    <th>PLL</th>
+                </tr>
+            </table>
+        </div>
+        <div id="timer-panel">
+            <div id="split-indicator"></div>
+            <div id="timer-display">0.00</div>
+            <div id="ready-display"></div>
+            <div id="progress-bar">
+                <div class="progress-line" id="progress-line1"></div>
+                <div class="diamond" id="diamond1"></div>
+                <div class="diamond" id="diamond2"></div>
+                <div class="diamond" id="diamond3"></div>
+                <div class="diamond" id="diamond4"></div>
+                <div class="progress-line" id="progress-line2"></div>
+            </div>
+        </div>
+        <div id="best-display">
+            <table id="best-table">
+                <tr>
+                    <th></th>
+                    <th>Best</th>
+                    <th>A05</th>
+                    <th>A012</th>
+                </tr>
+                <tr>
+                    <td>Total</td>
+                    <td id="best-total"></td>
+                    <td id="ao5-total"></td>
+                    <td id="ao12-total"></td>
+                </tr>
+                <tr>
+                    <td>Cross</td>
+                    <td id="best-cross"></td>
+                    <td id="ao5-cross"></td>
+                    <td id="ao12-cross"></td>
+                </tr>
+                <tr>
+                    <td>F2L</td>
+                    <td id="best-f2l"></td>
+                    <td id="ao5-f2l"></td>
+                    <td id="ao12-f2l"></td>
+                </tr>
+                <tr>
+                    <td>OLL</td>
+                    <td id="best-oll"></td>
+                    <td id="ao5-oll"></td>
+                    <td id="ao12-oll"></td>
+                </tr>
+                <tr>
+                    <td>PLL</td>
+                    <td id="best-pll"></td>
+                    <td id="ao5-pll"></td>
+                    <td id="ao12-pll"></td>
+                </tr>
+            </table>
+        </div>
+        <script>
+            const STORAGE_KEY = 'cubeTimerState';
+
+            let isRunning = false;
+            let startTime = 0;
+            let endTime = 0;
+            let elapsedTime = 0;
+            let timerInterval = null;
+            let primeTimer = false;
+            let solves = [];
+            let splitState = 0;
+            let splitMark = 0;
+            let crossTime = 0;
+            let f2lTime = 0;
+            let ollTime = 0;
+            let pllTime = 0;
+            let bestTime = Infinity;
+            let bestCross = Infinity;
+            let bestF2L = Infinity;
+            let bestOLL = Infinity;
+            let bestPLL = Infinity;
+
+            const SPLIT_FIELDS = [
+                { key: 'total', bestId: 'best-total', ao5Id: 'ao5-total', ao12Id: 'ao12-total' },
+                { key: 'cross', bestId: 'best-cross', ao5Id: 'ao5-cross', ao12Id: 'ao12-cross' },
+                { key: 'f2l', bestId: 'best-f2l', ao5Id: 'ao5-f2l', ao12Id: 'ao12-f2l' },
+                { key: 'oll', bestId: 'best-oll', ao5Id: 'ao5-oll', ao12Id: 'ao12-oll' },
+                { key: 'pll', bestId: 'best-pll', ao5Id: 'ao5-pll', ao12Id: 'ao12-pll' },
+            ];
+
+            function calculateAverage(n, splitName) {
+                const lastSolves = solves.slice(-n);
+                if (lastSolves.length < n) return null;
+                const sum = lastSolves.reduce((total, t) => total + t[splitName], 0);
+                return sum / lastSolves.length;
+            }
+            function formatAverage(value) {
+                if (value === null) {
+                    return '-';
+                } else {
+                    return value.toFixed(2);
+                }
+            }
+
+            function addSolveRow(solve) {
+                let newRow = document.getElementById('solves-table').insertRow(1);
+                newRow.insertCell(0).textContent = solve.total.toFixed(2);
+                newRow.insertCell(1).textContent = solve.cross.toFixed(2);
+                newRow.insertCell(2).textContent = solve.f2l.toFixed(2);
+                newRow.insertCell(3).textContent = solve.oll.toFixed(2);
+                newRow.insertCell(4).textContent = solve.pll.toFixed(2);
+            }
+
+            function updateBests(solve) {
+                if (solve.total < bestTime) bestTime = solve.total;
+                if (solve.cross < bestCross) bestCross = solve.cross;
+                if (solve.f2l < bestF2L) bestF2L = solve.f2l;
+                if (solve.oll < bestOLL) bestOLL = solve.oll;
+                if (solve.pll < bestPLL) bestPLL = solve.pll;
+            }
+
+            function refreshStatsDisplay() {
+                const bests = { total: bestTime, cross: bestCross, f2l: bestF2L, oll: bestOLL, pll: bestPLL };
+                SPLIT_FIELDS.forEach(function(field) {
+                    const bestVal = bests[field.key];
+                    document.getElementById(field.bestId).textContent = Number.isFinite(bestVal) ? bestVal.toFixed(2) : '-';
+                    document.getElementById(field.ao5Id).textContent = formatAverage(calculateAverage(5, field.key));
+                    document.getElementById(field.ao12Id).textContent = formatAverage(calculateAverage(12, field.key));
+                });
+            }
+
+            function saveState() {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    solves: solves,
+                    bestTime: bestTime,
+                    bestCross: bestCross,
+                    bestF2L: bestF2L,
+                    bestOLL: bestOLL,
+                    bestPLL: bestPLL,
+                }));
+            }
+
+            function loadState() {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                let data;
+                try {
+                    data = JSON.parse(raw);
+                } catch (e) {
+                    return;
+                }
+                solves = data.solves || [];
+                bestTime = data.bestTime ?? Infinity;
+                bestCross = data.bestCross ?? Infinity;
+                bestF2L = data.bestF2L ?? Infinity;
+                bestOLL = data.bestOLL ?? Infinity;
+                bestPLL = data.bestPLL ?? Infinity;
+                solves.forEach(addSolveRow);
+                refreshStatsDisplay();
+            }
+
+            function resetTimerDisplay() {
+                clearInterval(timerInterval);
+                isRunning = false;
+                primeTimer = false;
+                splitState = 0;
+                document.getElementById('timer-display').textContent = '0.00';
+                document.getElementById('timer-display').style.color = 'white';
+                document.getElementById('split-indicator').textContent = '';
+                document.getElementById('ready-display').textContent = '';
+                ['diamond1', 'diamond2', 'diamond3', 'diamond4'].forEach(function(id) {
+                    document.getElementById(id).style.borderColor = '#3a3a3a';
+                });
+            }
+
+            loadState();
+
+            document.addEventListener('keydown', function(event) {
+                if (event.code === 'Space') {
+                    event.preventDefault();
+                    if (!isRunning && !primeTimer) {
+                        primeTimer = true;
+                        document.getElementById('timer-display').textContent = '0.00';
+                        document.getElementById('timer-display').style.color = '#c2fe0b';
+                        document.getElementById('ready-display').textContent = 'READY';
+                        document.getElementById('ready-display').style.color = '#c2fe0b';
+                        document.getElementById('diamond1').style.borderColor = '#3a3a3a';
+                        document.getElementById('diamond2').style.borderColor = '#3a3a3a';
+                        document.getElementById('diamond3').style.borderColor = '#3a3a3a';
+                        document.getElementById('diamond4').style.borderColor = '#3a3a3a';
+                    }
+                }
+            });
+            document.addEventListener('keyup', function(event) {
+                if (event.code === 'Space') {
+                    event.preventDefault();
+                    switch(splitState) {
+                        case 0:
+                            startTime = Date.now();
+                            isRunning = true;
+                            primeTimer = false;
+                            splitState = 1;
+                            document.getElementById('split-indicator').textContent = 'CROSS';
+                            document.getElementById('timer-display').style.color = 'white';
+                            document.getElementById('ready-display').textContent = '';
+                            timerInterval = setInterval(function() {
+                            elapsedTime = (Date.now() - startTime) / 1000;
+                            document.getElementById('timer-display').textContent = elapsedTime.toFixed(2);
+                            }, 10);
+                        break;
+                        case 1:
+                            endTime = Date.now();
+                            crossTime = (endTime - startTime) / 1000;
+                            document.getElementById('split-indicator').textContent = 'F2L';
+                            document.getElementById('diamond1').style.borderColor = '#c2fe0b';
+                            splitMark = Date.now();
+                            splitState = 2;
+                        break;
+                        case 2:
+                            endTime = Date.now();
+                            f2lTime = (endTime - splitMark) / 1000;
+                            document.getElementById('split-indicator').textContent = 'OLL';
+                            document.getElementById('diamond2').style.borderColor = '#c2fe0b';
+                            splitMark = Date.now();
+                            splitState = 3;
+                        break;
+                        case 3:
+                            endTime = Date.now();
+                            ollTime = (endTime - splitMark) / 1000;
+                            document.getElementById('split-indicator').textContent = 'PLL';
+                            document.getElementById('diamond3').style.borderColor = '#c2fe0b';
+                            splitMark = Date.now();
+                            splitState = 4;
+                        break;
+                        case 4:
+                            endTime = Date.now();
+                            pllTime = (endTime - splitMark) / 1000;
+                            document.getElementById('split-indicator').textContent = '';
+                            document.getElementById('diamond4').style.borderColor = '#c2fe0b';
+                            splitState = 0;
+                            isRunning = false;
+                            clearInterval(timerInterval);
+                            elapsedTime = crossTime + f2lTime + ollTime + pllTime;
+                            document.getElementById('timer-display').textContent = elapsedTime.toFixed(2);
+                            const solve = {
+                                total: elapsedTime,
+                                cross: crossTime,
+                                f2l: f2lTime,
+                                oll: ollTime,
+                                pll: pllTime
+                            };
+                            solves.push(solve);
+                            addSolveRow(solve);
+                            updateBests(solve);
+                            refreshStatsDisplay();
+                            saveState();
+                        break;
+                    }
+                }
+            });
+
+            window.addEventListener('blur', function() {
+                if (primeTimer || isRunning) {
+                    resetTimerDisplay();
+                }
+            });
+        </script>
+    </body>
+</html>
