@@ -161,6 +161,26 @@
                 text-align: center;
                 padding: 5px;
             }
+            #solves-table td:last-child,
+            #solves-table th:last-child {
+                width: 36px;
+            }
+            .delete-solve-btn {
+                background: none;
+                border: 1px solid #3a3a3a;
+                color: #c2fe0b;
+                cursor: pointer;
+                font-family: 'JetBrains Mono', Monospace;
+                font-size: 13px;
+                line-height: 1;
+                padding: 2px 7px;
+                border-radius: 2px;
+            }
+            .delete-solve-btn:hover {
+                background-color: #c2fe0b;
+                color: black;
+                border-color: #c2fe0b;
+            }
         </style>
     </head>
     <body>
@@ -172,6 +192,7 @@
                     <th>F2L</th>
                     <th>OLL</th>
                     <th>PLL</th>
+                    <th></th>
                 </tr>
             </table>
         </div>
@@ -238,6 +259,7 @@
             let timerInterval = null;
             let primeTimer = false;
             let solves = [];
+            let nextSolveId = 1;
             let splitState = 0;
             let splitMark = 0;
             let crossTime = 0;
@@ -274,11 +296,33 @@
 
             function addSolveRow(solve) {
                 let newRow = document.getElementById('solves-table').insertRow(1);
+                newRow.dataset.solveId = solve.id;
                 newRow.insertCell(0).textContent = solve.total.toFixed(2);
                 newRow.insertCell(1).textContent = solve.cross.toFixed(2);
                 newRow.insertCell(2).textContent = solve.f2l.toFixed(2);
                 newRow.insertCell(3).textContent = solve.oll.toFixed(2);
                 newRow.insertCell(4).textContent = solve.pll.toFixed(2);
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = '×';
+                deleteButton.className = 'delete-solve-btn';
+                deleteButton.title = 'Delete this solve';
+                deleteButton.addEventListener('click', function() {
+                    if (confirm('Delete this solve?')) {
+                        deleteSolve(solve.id);
+                    }
+                });
+                newRow.insertCell(5).appendChild(deleteButton);
+            }
+
+            function deleteSolve(id) {
+                const index = solves.findIndex(function(s) { return s.id === id; });
+                if (index === -1) return;
+                solves.splice(index, 1);
+                const row = document.querySelector('#solves-table tr[data-solve-id="' + id + '"]');
+                if (row) row.remove();
+                recomputeBests();
+                refreshStatsDisplay();
+                saveState();
             }
 
             function updateBests(solve) {
@@ -287,6 +331,15 @@
                 if (solve.f2l < bestF2L) bestF2L = solve.f2l;
                 if (solve.oll < bestOLL) bestOLL = solve.oll;
                 if (solve.pll < bestPLL) bestPLL = solve.pll;
+            }
+
+            function recomputeBests() {
+                bestTime = Infinity;
+                bestCross = Infinity;
+                bestF2L = Infinity;
+                bestOLL = Infinity;
+                bestPLL = Infinity;
+                solves.forEach(updateBests);
             }
 
             function refreshStatsDisplay() {
@@ -302,6 +355,7 @@
             function saveState() {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({
                     solves: solves,
+                    nextSolveId: nextSolveId,
                     bestTime: bestTime,
                     bestCross: bestCross,
                     bestF2L: bestF2L,
@@ -320,6 +374,12 @@
                     return;
                 }
                 solves = data.solves || [];
+                nextSolveId = data.nextSolveId || 1;
+                solves.forEach(function(s) {
+                    if (s.id === undefined) {
+                        s.id = nextSolveId++;
+                    }
+                });
                 bestTime = data.bestTime ?? Infinity;
                 bestCross = data.bestCross ?? Infinity;
                 bestF2L = data.bestF2L ?? Infinity;
@@ -413,6 +473,7 @@
                             elapsedTime = crossTime + f2lTime + ollTime + pllTime;
                             document.getElementById('timer-display').textContent = elapsedTime.toFixed(2);
                             const solve = {
+                                id: nextSolveId++,
                                 total: elapsedTime,
                                 cross: crossTime,
                                 f2l: f2lTime,
@@ -425,6 +486,15 @@
                             refreshStatsDisplay();
                             saveState();
                         break;
+                    }
+                }
+            });
+
+            document.addEventListener('keydown', function(event) {
+                if ((event.code === 'Backspace' || event.code === 'Delete') && !isRunning && !primeTimer) {
+                    event.preventDefault();
+                    if (solves.length > 0) {
+                        deleteSolve(solves[solves.length - 1].id);
                     }
                 }
             });
