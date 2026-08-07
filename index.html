@@ -182,10 +182,61 @@
                 color: black;
                 border-color: #c2fe0b;
             }
+            #session-controls {
+                position: sticky;
+                top: 0;
+                background-color: black;
+                border-bottom: 1px solid #c2fe0b;
+                padding: 12px 15px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+            #session-label {
+                font-family: 'Bebas Neue', Monospace;
+                font-size: 20px;
+                letter-spacing: 3px;
+                color: #c2fe0b;
+            }
+            #session-actions {
+                display: flex;
+                gap: 8px;
+            }
+            #session-select {
+                flex: 1;
+                width: 0;
+                background-color: black;
+                color: white;
+                border: 1px solid #3a3a3a;
+                font-family: 'JetBrains Mono', Monospace;
+                font-size: 12px;
+                padding: 4px;
+            }
+            #new-session-btn {
+                background-color: #c2fe0b;
+                color: black;
+                border: none;
+                font-family: 'Bebas Neue', Monospace;
+                letter-spacing: 2px;
+                font-size: 14px;
+                padding: 4px 10px;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+            #new-session-btn:hover {
+                background-color: white;
+            }
         </style>
     </head>
     <body>
         <div id="grid-panel">
+            <div id="session-controls">
+                <div id="session-label"></div>
+                <div id="session-actions">
+                    <select id="session-select"></select>
+                    <button id="new-session-btn">+ New Session</button>
+                </div>
+            </div>
             <table id="solves-table">
                 <tr>
                     <th>Total</th>
@@ -261,6 +312,9 @@
             let primeTimer = false;
             let solves = [];
             let nextSolveId = 1;
+            let sessions = [];
+            let currentSessionId = null;
+            let nextSessionId = 1;
             let splitState = 0;
             let splitMark = 0;
             let crossTime = 0;
@@ -353,41 +407,116 @@
                 });
             }
 
+            function getCurrentSession() {
+                return sessions.find(function(s) { return s.id === currentSessionId; });
+            }
+
+            function formatDate(iso) {
+                return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+            }
+
+            function clearSolvesTable() {
+                const table = document.getElementById('solves-table');
+                while (table.rows.length > 1) {
+                    table.deleteRow(1);
+                }
+            }
+
+            function updateSessionLabel() {
+                const session = getCurrentSession();
+                document.getElementById('session-label').textContent = 'Session ' + session.id + ' — ' + formatDate(session.date);
+            }
+
+            function renderSessionSelect() {
+                const select = document.getElementById('session-select');
+                select.innerHTML = '';
+                sessions.slice().sort(function(a, b) { return b.id - a.id; }).forEach(function(s) {
+                    const option = document.createElement('option');
+                    option.value = s.id;
+                    option.textContent = 'Session ' + s.id + ' — ' + formatDate(s.date);
+                    select.appendChild(option);
+                });
+                select.value = currentSessionId;
+            }
+
+            function switchSession(id) {
+                if (isRunning || primeTimer) {
+                    resetTimerDisplay();
+                }
+                currentSessionId = id;
+                solves = getCurrentSession().solves;
+                clearSolvesTable();
+                solves.forEach(addSolveRow);
+                recomputeBests();
+                refreshStatsDisplay();
+                updateSessionLabel();
+                renderSessionSelect();
+                saveState();
+            }
+
+            function startNewSession() {
+                const session = { id: nextSessionId++, date: new Date().toISOString(), solves: [] };
+                sessions.push(session);
+                switchSession(session.id);
+            }
+
             function saveState() {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                    solves: solves,
+                    sessions: sessions,
+                    currentSessionId: currentSessionId,
+                    nextSessionId: nextSessionId,
                     nextSolveId: nextSolveId,
-                    bestTime: bestTime,
-                    bestCross: bestCross,
-                    bestF2L: bestF2L,
-                    bestOLL: bestOLL,
-                    bestPLL: bestPLL,
                 }));
             }
 
             function loadState() {
                 const raw = localStorage.getItem(STORAGE_KEY);
-                if (!raw) return;
-                let data;
-                try {
-                    data = JSON.parse(raw);
-                } catch (e) {
-                    return;
-                }
-                solves = data.solves || [];
-                nextSolveId = data.nextSolveId || 1;
-                solves.forEach(function(s) {
-                    if (s.id === undefined) {
-                        s.id = nextSolveId++;
+                let data = null;
+                if (raw) {
+                    try {
+                        data = JSON.parse(raw);
+                    } catch (e) {
+                        data = null;
                     }
+                }
+
+                if (data && data.sessions && data.sessions.length) {
+                    sessions = data.sessions;
+                    nextSessionId = data.nextSessionId || (Math.max.apply(null, sessions.map(function(s) { return s.id; })) + 1);
+                    nextSolveId = data.nextSolveId || 1;
+                    currentSessionId = data.currentSessionId;
+                } else if (data && data.solves) {
+                    // Migrate legacy single-session save into Session 1
+                    sessions = [{ id: 1, date: new Date().toISOString(), solves: data.solves }];
+                    nextSessionId = 2;
+                    nextSolveId = data.nextSolveId || 1;
+                    currentSessionId = 1;
+                } else {
+                    sessions = [];
+                    nextSessionId = 1;
+                    nextSolveId = 1;
+                    currentSessionId = null;
+                }
+
+                sessions.forEach(function(session) {
+                    session.solves.forEach(function(s) {
+                        if (s.id === undefined) s.id = nextSolveId++;
+                    });
                 });
-                bestTime = data.bestTime ?? Infinity;
-                bestCross = data.bestCross ?? Infinity;
-                bestF2L = data.bestF2L ?? Infinity;
-                bestOLL = data.bestOLL ?? Infinity;
-                bestPLL = data.bestPLL ?? Infinity;
+
+                if (!sessions.length) {
+                    sessions.push({ id: nextSessionId++, date: new Date().toISOString(), solves: [] });
+                }
+                if (!getCurrentSession()) {
+                    currentSessionId = sessions[sessions.length - 1].id;
+                }
+
+                solves = getCurrentSession().solves;
                 solves.forEach(addSolveRow);
+                recomputeBests();
                 refreshStatsDisplay();
+                updateSessionLabel();
+                renderSessionSelect();
             }
 
             function resetTimerDisplay() {
@@ -405,6 +534,11 @@
             }
 
             loadState();
+
+            document.getElementById('new-session-btn').addEventListener('click', startNewSession);
+            document.getElementById('session-select').addEventListener('change', function(event) {
+                switchSession(Number(event.target.value));
+            });
 
             document.addEventListener('keydown', function(event) {
                 if (event.code === 'Space') {
