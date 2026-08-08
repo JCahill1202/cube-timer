@@ -2,6 +2,7 @@
 <html>
     <head>
         <title>Cube Timer</title>
+        <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='black'/%3E%3Crect x='30' y='30' width='40' height='40' fill='%23c2fe0b' transform='rotate(45 50 50)'/%3E%3C/svg%3E">
         <link href="https://cdn.jsdelivr.net/npm/dseg@0.46.0/css/dseg.css" rel="stylesheet">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,38 +34,145 @@
                 font-weight: 700;
                 font-style: normal;
             }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                color-scheme: dark;
+            }
             body {
-                display: flex;
+                display: grid;
+                grid-template-columns: 30% 1fr 30%;
                 background-color: black;
                 margin: 0;
-                padding: 0;
                 font-family: 'Bebas Neue', sans-serif;
-                box-sizing: border-box;
                 border: 2px solid #c2fe0b;
+                height: 100vh;
+                overflow: hidden;
             }
+
+            /* ---------- Left panel: session + solves ---------- */
             #grid-panel {
-                width: 30%;
                 height: 100vh;
                 color: white;
-                border-collapse: collapse; /* Important: allows border-radius to work */
-                border-spacing: 0;         /* Removes gaps between cells */
                 border-right: 2px solid #c2fe0b;
-                border-bottom: 2px solid #c2fe0b;
-                border-radius: 0px;
                 overflow-y: auto;
+                overflow-x: hidden;
+                scrollbar-color: #3a3a3a black;
             }
+            #grid-panel::-webkit-scrollbar,
+            #best-display::-webkit-scrollbar {
+                width: 8px;
+            }
+            #grid-panel::-webkit-scrollbar-track,
+            #best-display::-webkit-scrollbar-track {
+                background: black;
+            }
+            #grid-panel::-webkit-scrollbar-thumb,
+            #best-display::-webkit-scrollbar-thumb {
+                background: #3a3a3a;
+                border-radius: 4px;
+            }
+            #grid-panel::-webkit-scrollbar-thumb:hover,
+            #best-display::-webkit-scrollbar-thumb:hover {
+                background: #c2fe0b;
+            }
+            #session-controls {
+                position: sticky;
+                top: 0;
+                background-color: black;
+                border-bottom: 1px solid #c2fe0b;
+                padding: 16px 18px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                z-index: 2;
+            }
+            #session-label {
+                font-family: 'Bebas Neue', Monospace;
+                font-size: 20px;
+                letter-spacing: 3px;
+                color: #c2fe0b;
+                text-shadow: 0 0 14px rgba(194, 254, 11, 0.35);
+            }
+            #session-actions {
+                display: flex;
+                gap: 8px;
+            }
+            #session-select {
+                flex: 1;
+                width: 0;
+                background-color: #0d0d0d;
+                color: white;
+                border: 1px solid #3a3a3a;
+                border-radius: 4px;
+                font-family: 'JetBrains Mono', Monospace;
+                font-size: 12px;
+                padding: 6px 24px 6px 8px;
+                appearance: none;
+                -webkit-appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23c2fe0b'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 8px center;
+                cursor: pointer;
+                transition: border-color 0.2s ease;
+            }
+            #session-select:hover,
+            #session-select:focus {
+                border-color: #c2fe0b;
+                outline: none;
+            }
+            #new-session-btn {
+                background-color: #c2fe0b;
+                color: black;
+                border: none;
+                border-radius: 4px;
+                font-family: 'Bebas Neue', Monospace;
+                letter-spacing: 2px;
+                font-size: 14px;
+                padding: 6px 12px;
+                cursor: pointer;
+                white-space: nowrap;
+                transition: background-color 0.15s ease, transform 0.1s ease;
+            }
+            #new-session-btn:hover {
+                background-color: #d9ff4d;
+            }
+            #new-session-btn:active {
+                transform: scale(0.95);
+            }
+
+            /* ---------- Center panel: timer ---------- */
             #timer-panel {
-                width: 70%;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
-                position: absolute;
-                left: 50%;
-                transform: translateX(-50%);
                 height: 100vh;
-                gap: 40px;
+                gap: 36px;
+                position: relative;
+            }
+            #timer-panel::before {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 440px;
+                height: 440px;
+                max-width: 70vw;
+                max-height: 70vw;
+                border: 2px solid rgba(194, 254, 11, 0.07);
+                transform: translate(-50%, -50%) rotate(45deg);
+                z-index: -1;
                 pointer-events: none;
+            }
+            #brand {
+                position: absolute;
+                top: 36px;
+                font-family: 'Bebas Neue', Monospace;
+                font-size: 16px;
+                letter-spacing: 10px;
+                color: #3a3a3a;
             }
             #split-indicator{
                 font-family: 'Bebas Neue', Monospace;
@@ -72,15 +180,19 @@
                 letter-spacing: 12px;
                 font-size: 80px;
                 color: #c2fe0b;
+                text-shadow: 0 0 20px rgba(194, 254, 11, 0.45);
             }
             #timer-display {
-                font-size: 120px;
+                font-size: 130px;
                 font-family: 'KH Interference', monospace;
                 color: white;
+                text-shadow: 0 0 12px currentColor, 0 0 34px currentColor;
+                transition: color 0.2s ease;
             }
             #ready-display {
                 font-size: 40px;
                 height: 50px;
+                letter-spacing: 4px;
             }
             #progress-bar {
                 display: flex;
@@ -90,81 +202,76 @@
                 gap: 15px;
             }
             .diamond {
-                height: 10px;
-                width: 10px;
+                height: 12px;
+                width: 12px;
                 rotate: 45deg;
                 border: 2px solid #3a3a3a;
+                transition: border-color 0.25s ease, box-shadow 0.25s ease;
             }
             .progress-line {
                 height: 2px;
                 width: 50px;
                 background-color: #3a3a3a;
             }
+
+            /* ---------- Right panel: bests / averages ---------- */
             #best-display {
-                width: 30%;
                 height: 100vh;
-                position: absolute;
-                right: 0%;
-                border-spacing: 0;         /* Removes gaps between cells */
-                border: 2px solid #c2fe0b;
+                border-left: 2px solid #c2fe0b;
                 color: white;
+                overflow-y: auto;
+                overflow-x: hidden;
             }
             table {
                 width: 100%;
-                table-layout: fixed; /* Ensures equal column widths */
+                table-layout: fixed;
                 border-spacing: 0;
                 text-align: center;
                 letter-spacing: 2px;
-                overflow: hidden;          /* Ensures content respects the radius */
             }
-            #solves-table th{
+            tr {
+                background-color: black;
+                text-align: center;
+            }
+            #solves-table th {
                 padding: 15px;
                 text-align: center;
-                background-color:black;
+                background-color: black;
                 border-bottom: 1px solid #c2fe0b;
                 font-family: 'Bebas Neue', Monospace;
                 font-size: 20px;
                 letter-spacing: 4px;
                 color: #c2fe0b;
             }
-            #solves-table td{
+            #solves-table td {
                 padding: 15px 4px;
-                border-collapse: collapse;
                 font-family: 'JetBrains Mono', Monospace;
                 font-size: 15px;
-            }
-            #best-table th{
-                padding: 15px;
-                text-align: center;
-                background-color:#c2fe0b;
-                color: black;
-                font-family: 'KH Interference', Monospace;
-                font-weight: 400;
-                font-size: 20px;
-                letter-spacing: 4px;
-            }
-            #best-table td{
-                padding: 15px 4px;
-                border-collapse: collapse;
-                font-family: 'JetBrains Mono', Monospace;
-                font-size: 20px;
-            }
-            #best-table td:first-child {
-            text-align: left;
-            font-family: 'Bebas Neue', Monospace;
-            font-size: 25px;
-            column-width: 80px;
-            padding-left: 15px;
-            color: #c2fe0b;
-            }
-            tr {
-                background-color: #000000;
-                text-align: center;
-                padding: 5px;
             }
             #solves-table td:last-child,
             #solves-table th:last-child {
                 width: 36px;
+            }
+            #solves-table tr:not(:first-child) {
+                border-bottom: 1px solid #161616;
+            }
+            #solves-table tr:not(:first-child):hover {
+                background-color: #0d0d0d;
+            }
+            @keyframes rowIn {
+                from { opacity: 0; transform: translateY(-6px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            #solves-table tr.new-row {
+                animation: rowIn 0.3s ease;
+            }
+            td.empty-state {
+                padding: 60px 20px;
+                color: #3a3a3a;
+                font-family: 'JetBrains Mono', Monospace;
+                font-size: 13px;
+                letter-spacing: 1px;
+                text-align: center;
             }
             .delete-solve-btn {
                 background: none;
@@ -175,56 +282,48 @@
                 font-size: 13px;
                 line-height: 1;
                 padding: 2px 7px;
-                border-radius: 2px;
+                border-radius: 3px;
+                transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
             }
             .delete-solve-btn:hover {
                 background-color: #c2fe0b;
                 color: black;
                 border-color: #c2fe0b;
             }
-            #session-controls {
-                position: sticky;
-                top: 0;
-                background-color: black;
-                border-bottom: 1px solid #c2fe0b;
-                padding: 12px 15px;
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-            }
-            #session-label {
-                font-family: 'Bebas Neue', Monospace;
-                font-size: 20px;
-                letter-spacing: 3px;
-                color: #c2fe0b;
-            }
-            #session-actions {
-                display: flex;
-                gap: 8px;
-            }
-            #session-select {
-                flex: 1;
-                width: 0;
-                background-color: black;
-                color: white;
-                border: 1px solid #3a3a3a;
-                font-family: 'JetBrains Mono', Monospace;
-                font-size: 12px;
-                padding: 4px;
-            }
-            #new-session-btn {
+            #best-table th {
+                padding: 15px;
+                text-align: center;
                 background-color: #c2fe0b;
                 color: black;
-                border: none;
-                font-family: 'Bebas Neue', Monospace;
-                letter-spacing: 2px;
-                font-size: 14px;
-                padding: 4px 10px;
-                cursor: pointer;
-                white-space: nowrap;
+                font-family: 'KH Interference', Monospace;
+                font-weight: 400;
+                font-size: 20px;
+                letter-spacing: 4px;
             }
-            #new-session-btn:hover {
-                background-color: white;
+            #best-table th:first-child {
+                background-color: black;
+            }
+            #best-table td {
+                padding: 15px 4px;
+                font-family: 'JetBrains Mono', Monospace;
+                font-size: 20px;
+            }
+            #best-table td:first-child {
+                text-align: left;
+                font-family: 'Bebas Neue', Monospace;
+                font-size: 25px;
+                padding-left: 15px;
+                color: #c2fe0b;
+            }
+            #best-table tr:not(:first-child):hover {
+                background-color: #0d0d0d;
+            }
+            @keyframes pbFlash {
+                0% { background-color: #c2fe0b; color: black; }
+                100% { background-color: transparent; color: white; }
+            }
+            .pb-flash {
+                animation: pbFlash 1s ease;
             }
         </style>
     </head>
@@ -249,6 +348,7 @@
             </table>
         </div>
         <div id="timer-panel">
+            <div id="brand">CUBE TIMER</div>
             <div id="split-indicator"></div>
             <div id="timer-display">0.00</div>
             <div id="ready-display"></div>
@@ -349,8 +449,41 @@
                 }
             }
 
+            function setDiamond(id, active) {
+                const el = document.getElementById(id);
+                el.style.borderColor = active ? '#c2fe0b' : '#3a3a3a';
+                el.style.boxShadow = active ? '0 0 10px #c2fe0b' : 'none';
+            }
+
+            function resetDiamonds() {
+                ['diamond1', 'diamond2', 'diamond3', 'diamond4'].forEach(function(id) {
+                    setDiamond(id, false);
+                });
+            }
+
+            function updateEmptyState() {
+                const existing = document.getElementById('empty-state-row');
+                if (existing) existing.remove();
+                if (solves.length === 0) {
+                    const row = document.getElementById('solves-table').insertRow(1);
+                    row.id = 'empty-state-row';
+                    const cell = row.insertCell(0);
+                    cell.colSpan = 6;
+                    cell.textContent = 'No solves yet — press SPACE to begin';
+                    cell.className = 'empty-state';
+                }
+            }
+
+            function flashCell(id) {
+                const el = document.getElementById(id);
+                el.classList.remove('pb-flash');
+                void el.offsetWidth;
+                el.classList.add('pb-flash');
+            }
+
             function addSolveRow(solve) {
                 let newRow = document.getElementById('solves-table').insertRow(1);
+                newRow.className = 'new-row';
                 newRow.dataset.solveId = solve.id;
                 newRow.insertCell(0).textContent = solve.total.toFixed(2);
                 newRow.insertCell(1).textContent = solve.cross.toFixed(2);
@@ -377,6 +510,7 @@
                 if (row) row.remove();
                 recomputeBests();
                 refreshStatsDisplay();
+                updateEmptyState();
                 saveState();
             }
 
@@ -449,6 +583,7 @@
                 solves.forEach(addSolveRow);
                 recomputeBests();
                 refreshStatsDisplay();
+                updateEmptyState();
                 updateSessionLabel();
                 renderSessionSelect();
                 saveState();
@@ -515,6 +650,7 @@
                 solves.forEach(addSolveRow);
                 recomputeBests();
                 refreshStatsDisplay();
+                updateEmptyState();
                 updateSessionLabel();
                 renderSessionSelect();
             }
@@ -528,9 +664,7 @@
                 document.getElementById('timer-display').style.color = 'white';
                 document.getElementById('split-indicator').textContent = '';
                 document.getElementById('ready-display').textContent = '';
-                ['diamond1', 'diamond2', 'diamond3', 'diamond4'].forEach(function(id) {
-                    document.getElementById(id).style.borderColor = '#3a3a3a';
-                });
+                resetDiamonds();
             }
 
             loadState();
@@ -549,10 +683,7 @@
                         document.getElementById('timer-display').style.color = '#c2fe0b';
                         document.getElementById('ready-display').textContent = 'READY';
                         document.getElementById('ready-display').style.color = '#c2fe0b';
-                        document.getElementById('diamond1').style.borderColor = '#3a3a3a';
-                        document.getElementById('diamond2').style.borderColor = '#3a3a3a';
-                        document.getElementById('diamond3').style.borderColor = '#3a3a3a';
-                        document.getElementById('diamond4').style.borderColor = '#3a3a3a';
+                        resetDiamonds();
                     }
                 }
             });
@@ -577,7 +708,7 @@
                             endTime = Date.now();
                             crossTime = (endTime - startTime) / 1000;
                             document.getElementById('split-indicator').textContent = 'F2L';
-                            document.getElementById('diamond1').style.borderColor = '#c2fe0b';
+                            setDiamond('diamond1', true);
                             splitMark = Date.now();
                             splitState = 2;
                         break;
@@ -585,7 +716,7 @@
                             endTime = Date.now();
                             f2lTime = (endTime - splitMark) / 1000;
                             document.getElementById('split-indicator').textContent = 'OLL';
-                            document.getElementById('diamond2').style.borderColor = '#c2fe0b';
+                            setDiamond('diamond2', true);
                             splitMark = Date.now();
                             splitState = 3;
                         break;
@@ -593,7 +724,7 @@
                             endTime = Date.now();
                             ollTime = (endTime - splitMark) / 1000;
                             document.getElementById('split-indicator').textContent = 'PLL';
-                            document.getElementById('diamond3').style.borderColor = '#c2fe0b';
+                            setDiamond('diamond3', true);
                             splitMark = Date.now();
                             splitState = 4;
                         break;
@@ -601,7 +732,7 @@
                             endTime = Date.now();
                             pllTime = (endTime - splitMark) / 1000;
                             document.getElementById('split-indicator').textContent = '';
-                            document.getElementById('diamond4').style.borderColor = '#c2fe0b';
+                            setDiamond('diamond4', true);
                             splitState = 0;
                             isRunning = false;
                             clearInterval(timerInterval);
@@ -615,10 +746,17 @@
                                 oll: ollTime,
                                 pll: pllTime
                             };
+                            const previousBests = { total: bestTime, cross: bestCross, f2l: bestF2L, oll: bestOLL, pll: bestPLL };
                             solves.push(solve);
                             addSolveRow(solve);
                             updateBests(solve);
                             refreshStatsDisplay();
+                            updateEmptyState();
+                            SPLIT_FIELDS.forEach(function(field) {
+                                if (solve[field.key] < previousBests[field.key]) {
+                                    flashCell(field.bestId);
+                                }
+                            });
                             saveState();
                         break;
                     }
