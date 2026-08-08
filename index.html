@@ -49,7 +49,32 @@
                 border: 2px solid #c2fe0b;
                 height: 100vh;
                 overflow: hidden;
+                position: relative;
             }
+            body::after {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background-image: repeating-linear-gradient(
+                    to bottom,
+                    rgba(255, 255, 255, 0.03) 0px,
+                    rgba(255, 255, 255, 0.03) 1px,
+                    transparent 1px,
+                    transparent 3px
+                );
+                pointer-events: none;
+                z-index: 999;
+            }
+            .hud-corner {
+                position: fixed;
+                width: 16px;
+                height: 16px;
+                border-color: rgba(194, 254, 11, 0.5);
+                pointer-events: none;
+                z-index: 998;
+            }
+            .hud-corner.bl { bottom: 6px; left: 6px; border-bottom: 2px solid; border-left: 2px solid; }
+            .hud-corner.br { bottom: 6px; right: 6px; border-bottom: 2px solid; border-right: 2px solid; }
 
             /* ---------- Left panel: session + solves ---------- */
             #grid-panel {
@@ -59,6 +84,18 @@
                 overflow-y: auto;
                 overflow-x: hidden;
                 scrollbar-color: #3a3a3a black;
+                display: flex;
+                flex-direction: column;
+            }
+            .panel-filler {
+                flex: 1 1 auto;
+                min-height: 80px;
+                background-image:
+                    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='48'%3E%3Crect x='4' y='20' width='8' height='8' fill='none' stroke='%233a3a3a' stroke-width='1' transform='rotate(45 8 24)'/%3E%3C/svg%3E"),
+                    linear-gradient(to bottom, transparent, #1a1a1a 10%, #1a1a1a 90%, transparent);
+                background-repeat: repeat-y, no-repeat;
+                background-position: center top, center top;
+                background-size: 16px 48px, 1px 100%;
             }
             #grid-panel::-webkit-scrollbar,
             #best-display::-webkit-scrollbar {
@@ -152,28 +189,60 @@
                 gap: 36px;
                 position: relative;
             }
-            #timer-panel::before {
+            #timer-panel::before,
+            #timer-panel::after {
                 content: '';
                 position: absolute;
                 top: 50%;
                 left: 50%;
-                width: 440px;
-                height: 440px;
-                max-width: 70vw;
-                max-height: 70vw;
                 border: 2px solid rgba(194, 254, 11, 0.07);
                 transform: translate(-50%, -50%) rotate(45deg);
                 z-index: -1;
                 pointer-events: none;
             }
+            #timer-panel::before {
+                width: 440px;
+                height: 440px;
+                max-width: 70vw;
+                max-height: 70vw;
+            }
+            #timer-panel::after {
+                width: 300px;
+                height: 300px;
+                max-width: 48vw;
+                max-height: 48vw;
+                border-color: rgba(194, 254, 11, 0.05);
+            }
             #brand {
                 position: absolute;
-                top: 36px;
+                top: 34px;
+                display: flex;
+                align-items: center;
+                gap: 14px;
                 font-family: 'Bebas Neue', Monospace;
-                font-size: 16px;
-                letter-spacing: 10px;
+                font-size: 14px;
+                letter-spacing: 8px;
                 color: #3a3a3a;
             }
+            #brand .tick {
+                width: 44px;
+                height: 1px;
+                background: linear-gradient(to right, transparent, #3a3a3a, transparent);
+            }
+            #timer-frame {
+                position: relative;
+                padding: 28px 54px;
+            }
+            #timer-frame .frame-corner {
+                position: absolute;
+                width: 18px;
+                height: 18px;
+                border-color: rgba(194, 254, 11, 0.45);
+            }
+            #timer-frame .fc-tl { top: 0; left: 0; border-top: 2px solid; border-left: 2px solid; }
+            #timer-frame .fc-tr { top: 0; right: 0; border-top: 2px solid; border-right: 2px solid; }
+            #timer-frame .fc-bl { bottom: 0; left: 0; border-bottom: 2px solid; border-left: 2px solid; }
+            #timer-frame .fc-br { bottom: 0; right: 0; border-bottom: 2px solid; border-right: 2px solid; }
             #split-indicator{
                 font-family: 'Bebas Neue', Monospace;
                 height: 90px;
@@ -221,6 +290,8 @@
                 color: white;
                 overflow-y: auto;
                 overflow-x: hidden;
+                display: flex;
+                flex-direction: column;
             }
             table {
                 width: 100%;
@@ -328,6 +399,8 @@
         </style>
     </head>
     <body>
+        <div class="hud-corner bl" aria-hidden="true"></div>
+        <div class="hud-corner br" aria-hidden="true"></div>
         <div id="grid-panel">
             <div id="session-controls">
                 <div id="session-label"></div>
@@ -346,11 +419,18 @@
                     <th></th>
                 </tr>
             </table>
+            <div class="panel-filler" aria-hidden="true"></div>
         </div>
         <div id="timer-panel">
-            <div id="brand">CUBE TIMER</div>
+            <div id="brand"><span class="tick"></span>CUBE TIMER<span class="tick"></span></div>
             <div id="split-indicator"></div>
-            <div id="timer-display">0.00</div>
+            <div id="timer-frame">
+                <span class="frame-corner fc-tl"></span>
+                <span class="frame-corner fc-tr"></span>
+                <span class="frame-corner fc-bl"></span>
+                <span class="frame-corner fc-br"></span>
+                <div id="timer-display">0.00</div>
+            </div>
             <div id="ready-display"></div>
             <div id="progress-bar">
                 <div class="progress-line" id="progress-line1"></div>
@@ -400,6 +480,7 @@
                     <td id="ao12-pll"></td>
                 </tr>
             </table>
+            <div class="panel-filler" aria-hidden="true"></div>
         </div>
         <script>
             const STORAGE_KEY = 'cubeTimerState';
