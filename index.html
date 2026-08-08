@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>Cube Timer</title>
-        <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='black'/%3E%3Crect x='30' y='30' width='40' height='40' fill='%23c2fe0b' transform='rotate(45 50 50)'/%3E%3C/svg%3E">
+        <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='black'/%3E%3Crect x='30' y='30' width='40' height='40' fill='%238fe0ff' transform='rotate(45 50 50)'/%3E%3C/svg%3E">
         <link href="https://cdn.jsdelivr.net/npm/dseg@0.46.0/css/dseg.css" rel="stylesheet">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,13 +40,18 @@
             html {
                 color-scheme: dark;
             }
+            :root {
+                --accent: #8fe0ff;
+                --accent-hover: #cdf3ff;
+                --muted: #33424a;
+            }
             body {
                 display: grid;
                 grid-template-columns: 30% 1fr 30%;
                 background-color: black;
                 margin: 0;
                 font-family: 'Bebas Neue', sans-serif;
-                border: 2px solid #c2fe0b;
+                border: 2px solid var(--accent);
                 height: 100vh;
                 overflow: hidden;
                 position: relative;
@@ -69,7 +74,7 @@
                 position: fixed;
                 width: 16px;
                 height: 16px;
-                border-color: rgba(194, 254, 11, 0.5);
+                border-color: rgba(143, 224, 255, 0.5);
                 pointer-events: none;
                 z-index: 998;
             }
@@ -80,10 +85,10 @@
             #grid-panel {
                 height: 100vh;
                 color: white;
-                border-right: 2px solid #c2fe0b;
+                border-right: 2px solid var(--accent);
                 overflow-y: auto;
                 overflow-x: hidden;
-                scrollbar-color: #3a3a3a black;
+                scrollbar-color: var(--muted) black;
                 display: flex;
                 flex-direction: column;
             }
@@ -91,7 +96,7 @@
                 flex: 1 1 auto;
                 min-height: 80px;
                 background-image:
-                    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='48'%3E%3Crect x='4' y='20' width='8' height='8' fill='none' stroke='%233a3a3a' stroke-width='1' transform='rotate(45 8 24)'/%3E%3C/svg%3E"),
+                    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='48'%3E%3Crect x='4' y='20' width='8' height='8' fill='none' stroke='%2333424a' stroke-width='1' transform='rotate(45 8 24)'/%3E%3C/svg%3E"),
                     linear-gradient(to bottom, transparent, #1a1a1a 10%, #1a1a1a 90%, transparent);
                 background-repeat: repeat-y, no-repeat;
                 background-position: center top, center top;
@@ -107,18 +112,18 @@
             }
             #grid-panel::-webkit-scrollbar-thumb,
             #best-display::-webkit-scrollbar-thumb {
-                background: #3a3a3a;
+                background: var(--muted);
                 border-radius: 4px;
             }
             #grid-panel::-webkit-scrollbar-thumb:hover,
             #best-display::-webkit-scrollbar-thumb:hover {
-                background: #c2fe0b;
+                background: var(--accent);
             }
             #session-controls {
                 position: sticky;
                 top: 0;
                 background-color: black;
-                border-bottom: 1px solid #c2fe0b;
+                border-bottom: 1px solid var(--accent);
                 padding: 16px 18px;
                 display: flex;
                 flex-direction: column;
@@ -129,8 +134,8 @@
                 font-family: 'Bebas Neue', Monospace;
                 font-size: 20px;
                 letter-spacing: 3px;
-                color: #c2fe0b;
-                text-shadow: 0 0 14px rgba(194, 254, 11, 0.35);
+                color: var(--accent);
+                text-shadow: 0 0 14px rgba(143, 224, 255, 0.35);
             }
             #session-actions {
                 display: flex;
@@ -141,14 +146,14 @@
                 width: 0;
                 background-color: #0d0d0d;
                 color: white;
-                border: 1px solid #3a3a3a;
+                border: 1px solid var(--muted);
                 border-radius: 4px;
                 font-family: 'JetBrains Mono', Monospace;
                 font-size: 12px;
                 padding: 6px 24px 6px 8px;
                 appearance: none;
                 -webkit-appearance: none;
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23c2fe0b'/%3E%3C/svg%3E");
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238fe0ff'/%3E%3C/svg%3E");
                 background-repeat: no-repeat;
                 background-position: right 8px center;
                 cursor: pointer;
@@ -156,11 +161,11 @@
             }
             #session-select:hover,
             #session-select:focus {
-                border-color: #c2fe0b;
+                border-color: var(--accent);
                 outline: none;
             }
             #new-session-btn {
-                background-color: #c2fe0b;
+                background-color: var(--accent);
                 color: black;
                 border: none;
                 border-radius: 4px;
@@ -173,7 +178,7 @@
                 transition: background-color 0.15s ease, transform 0.1s ease;
             }
             #new-session-btn:hover {
-                background-color: #d9ff4d;
+                background-color: var(--accent-hover);
             }
             #new-session-btn:active {
                 transform: scale(0.95);
@@ -195,7 +200,7 @@
                 position: absolute;
                 top: 50%;
                 left: 50%;
-                border: 2px solid rgba(194, 254, 11, 0.07);
+                border: 2px solid rgba(143, 224, 255, 0.07);
                 transform: translate(-50%, -50%) rotate(45deg);
                 z-index: -1;
                 pointer-events: none;
@@ -211,7 +216,7 @@
                 height: 300px;
                 max-width: 48vw;
                 max-height: 48vw;
-                border-color: rgba(194, 254, 11, 0.05);
+                border-color: rgba(143, 224, 255, 0.05);
             }
             #brand {
                 position: absolute;
@@ -222,12 +227,12 @@
                 font-family: 'Bebas Neue', Monospace;
                 font-size: 14px;
                 letter-spacing: 8px;
-                color: #3a3a3a;
+                color: var(--muted);
             }
             #brand .tick {
                 width: 44px;
                 height: 1px;
-                background: linear-gradient(to right, transparent, #3a3a3a, transparent);
+                background: linear-gradient(to right, transparent, var(--muted), transparent);
             }
             #timer-frame {
                 position: relative;
@@ -237,7 +242,7 @@
                 position: absolute;
                 width: 18px;
                 height: 18px;
-                border-color: rgba(194, 254, 11, 0.45);
+                border-color: rgba(143, 224, 255, 0.45);
             }
             #timer-frame .fc-tl { top: 0; left: 0; border-top: 2px solid; border-left: 2px solid; }
             #timer-frame .fc-tr { top: 0; right: 0; border-top: 2px solid; border-right: 2px solid; }
@@ -248,8 +253,8 @@
                 height: 90px;
                 letter-spacing: 12px;
                 font-size: 80px;
-                color: #c2fe0b;
-                text-shadow: 0 0 20px rgba(194, 254, 11, 0.45);
+                color: var(--accent);
+                text-shadow: 0 0 20px rgba(143, 224, 255, 0.45);
             }
             #timer-display {
                 font-size: 130px;
@@ -274,19 +279,19 @@
                 height: 12px;
                 width: 12px;
                 rotate: 45deg;
-                border: 2px solid #3a3a3a;
+                border: 2px solid var(--muted);
                 transition: border-color 0.25s ease, box-shadow 0.25s ease;
             }
             .progress-line {
                 height: 2px;
                 width: 50px;
-                background-color: #3a3a3a;
+                background-color: var(--muted);
             }
 
             /* ---------- Right panel: bests / averages ---------- */
             #best-display {
                 height: 100vh;
-                border-left: 2px solid #c2fe0b;
+                border-left: 2px solid var(--accent);
                 color: white;
                 overflow-y: auto;
                 overflow-x: hidden;
@@ -308,11 +313,11 @@
                 padding: 15px;
                 text-align: center;
                 background-color: black;
-                border-bottom: 1px solid #c2fe0b;
+                border-bottom: 1px solid var(--accent);
                 font-family: 'Bebas Neue', Monospace;
                 font-size: 20px;
                 letter-spacing: 4px;
-                color: #c2fe0b;
+                color: var(--accent);
             }
             #solves-table td {
                 padding: 15px 4px;
@@ -338,7 +343,7 @@
             }
             td.empty-state {
                 padding: 60px 20px;
-                color: #3a3a3a;
+                color: var(--muted);
                 font-family: 'JetBrains Mono', Monospace;
                 font-size: 13px;
                 letter-spacing: 1px;
@@ -346,8 +351,8 @@
             }
             .delete-solve-btn {
                 background: none;
-                border: 1px solid #3a3a3a;
-                color: #c2fe0b;
+                border: 1px solid var(--muted);
+                color: var(--accent);
                 cursor: pointer;
                 font-family: 'JetBrains Mono', Monospace;
                 font-size: 13px;
@@ -357,14 +362,14 @@
                 transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
             }
             .delete-solve-btn:hover {
-                background-color: #c2fe0b;
+                background-color: var(--accent);
                 color: black;
-                border-color: #c2fe0b;
+                border-color: var(--accent);
             }
             #best-table th {
                 padding: 15px;
                 text-align: center;
-                background-color: #c2fe0b;
+                background-color: var(--accent);
                 color: black;
                 font-family: 'KH Interference', Monospace;
                 font-weight: 400;
@@ -384,13 +389,13 @@
                 font-family: 'Bebas Neue', Monospace;
                 font-size: 25px;
                 padding-left: 15px;
-                color: #c2fe0b;
+                color: var(--accent);
             }
             #best-table tr:not(:first-child):hover {
                 background-color: #0d0d0d;
             }
             @keyframes pbFlash {
-                0% { background-color: #c2fe0b; color: black; }
+                0% { background-color: var(--accent); color: black; }
                 100% { background-color: transparent; color: white; }
             }
             .pb-flash {
@@ -532,8 +537,8 @@
 
             function setDiamond(id, active) {
                 const el = document.getElementById(id);
-                el.style.borderColor = active ? '#c2fe0b' : '#3a3a3a';
-                el.style.boxShadow = active ? '0 0 10px #c2fe0b' : 'none';
+                el.style.borderColor = active ? 'var(--accent)' : 'var(--muted)';
+                el.style.boxShadow = active ? '0 0 10px var(--accent)' : 'none';
             }
 
             function resetDiamonds() {
@@ -761,9 +766,9 @@
                     if (!isRunning && !primeTimer) {
                         primeTimer = true;
                         document.getElementById('timer-display').textContent = '0.00';
-                        document.getElementById('timer-display').style.color = '#c2fe0b';
+                        document.getElementById('timer-display').style.color = 'var(--accent)';
                         document.getElementById('ready-display').textContent = 'READY';
-                        document.getElementById('ready-display').style.color = '#c2fe0b';
+                        document.getElementById('ready-display').style.color = 'var(--accent)';
                         resetDiamonds();
                     }
                 }
